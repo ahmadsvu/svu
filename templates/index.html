@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>توزيع المراجعين على الشبابيك</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>توزيع المراجعين على الشبابيك</h1>
+
+        <!-- إدخال عدد الشبابيك وعدد العملاء -->
+        <div id="initial-inputs">
+            <label for="num_windows">عدد الشبابيك:</label>
+            <input type="number" id="num_windows" name="num_windows" required>
+            <br><br>
+
+            <label for="num_customers">عدد العملاء:</label>
+            <input type="number" id="num_customers" name="num_customers" required>
+            <br><br>
+
+            <button type="button" onclick="generateCustomerFields()">إنشاء حقول العملاء</button>
+        </div>
+
+        <!-- حقول العملاء التي يتم توليدها ديناميكيًا -->
+        <form method="POST" id="customer-form" style="display: none;">
+            <input type="hidden" name="num_windows" id="form_num_windows">
+            <input type="hidden" name="num_customers" id="form_num_customers">
+            <div id="customer-fields"></div>
+            <button type="submit">تشغيل الخوارزمية</button>
+        </form>
+
+       <!-- عرض النتائج -->
+{% if results %}
+    <h2>النتائج:</h2>
+    
+    <p>الوقت الإجمالي لأطول دور : {{ results.best_fitness }} دقيقة</p>
+    <table border="1" style="border-collapse: collapse; width: 100%; text-align: center;">
+        <thead>
+            <tr>
+                <th>رقم الشباك</th>
+                <th>العملاء</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for window in results.windows %}
+                <tr>
+                    <td>الشباك {{ loop.index0+1 }}</td>
+                    <td>{{ window }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+
+{% if error %}
+    <p style="color: red;">خطأ: {{ error }}</p>
+{% endif %}
+
+    </div>
+
+    <script>
+        function generateCustomerFields() {
+            const numCustomers = document.getElementById("num_customers").value;
+            const numWindows = document.getElementById("num_windows").value;
+            const customerFields = document.getElementById("customer-fields");
+            customerFields.innerHTML = ""; // مسح الحقول القديمة
+
+            // تعبئة الحقول المخفية
+            document.getElementById("form_num_windows").value = numWindows;
+            document.getElementById("form_num_customers").value = numCustomers;
+
+            // إضافة حقول إدخال بيانات العملاء
+            for (let i = 1; i <= numCustomers; i++) {
+                const field = `
+                    <div class="customer-row">
+                        <label for="customer${i}_id">العميل ${i} - الرقم:</label>
+                        <input type="number" id="customer${i}_id" name="customer${i}_id" required>
+
+                        <label for="customer${i}_duration">مدة الطلب:</label>
+                        <input type="number" id="customer${i}_duration" name="customer${i}_duration" required>
+                        <br><br>
+                    </div>
+                `;
+                customerFields.innerHTML += field;
+            }
+
+            // إظهار النموذج بعد توليد الحقول
+            document.getElementById("customer-form").style.display = "block";
+        }
+    </script>
+</body>
+</html>
